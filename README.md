@@ -9,7 +9,7 @@ recommended one** — it does word-level forced alignment before diarization,
 giving noticeably tighter speaker boundaries. A simpler `pyannote` + `whisper`
 overlap-merge pipeline (`diarization_pyannote.py`) is kept as an alternative.
 
-Both were run on the same clip; outputs are checked in for comparison:
+Both were run on the same video clip in test/dataset/world_cup; outputs are checked in for comparison:
 
 - `test/dataset/world_cup/wx_transcript.txt` — WhisperX
 - `test/dataset/world_cup/pyan_transcript.txt` — pyannote + whisper
@@ -17,6 +17,8 @@ Both were run on the same clip; outputs are checked in for comparison:
 The WhisperX output is clearly better: no `UNKNOWN` speakers, cleaner turn
 boundaries (the pyannote run merges two speakers into one line and drops
 overlapping speech), and more accurate text (e.g. "Otamendi" vs "Iota Mendy").
+
+Format of transcription txt files: [<start>s] <SPEAKER>: <text>
 
 ## Setup
 
@@ -44,11 +46,6 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 ### Models & hardware
 
 Both scripts auto-detect CUDA and fall back to CPU; no flag needed.
-
-| | default `--model` | CUDA | CPU |
-|---|---|---|---|
-| `diarization_whisperx.py` | `large-v3` | `int8`, batch ≤ 4 on small GPUs | `int8` |
-| `diarization_pyannote.py` | `medium` | fp32 decode (`fp16=False`) | fp32 decode |
 
 On CPU, prefer a smaller whisper model (`--model medium` or `small`) — `large-v3`
 is very slow without a GPU.
@@ -121,5 +118,3 @@ python diarization_pyannote.py match.mp4 --num-speakers 2 --out transcript.txt
   system has FFmpeg 8 (it supports 4–7). This pipeline sidesteps that by loading
   audio in-memory with `scipy`, so any `torchcodec`/FFmpeg warnings on startup
   are harmless.
-- Whisper decodes in fp32 (`fp16=False`) because fp16 produces NaN logits on
-  some GPUs.
