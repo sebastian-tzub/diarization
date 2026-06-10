@@ -20,6 +20,24 @@ overlapping speech), and more accurate text (e.g. "Otamendi" vs "Iota Mendy").
 
 Format of transcription txt files: [<start>s] <SPEAKER>: <text>
 
+## Usage
+
+```bash
+# Minimal — token read from .env:
+python diarization_whisperx.py match.mp4
+
+# All options:
+python diarization_whisperx.py match.mp4 \
+  --num-speakers 2 \
+  --model large-v3 \
+  --out transcript.txt \
+  --hf-token hf_xxxxxxxxxxxx     # optional; defaults to HF_TOKEN from .env
+```
+
+`--num-speakers` is optional but recommended — passing the known count (e.g. `2`
+for a two-person commentary booth) makes diarization significantly more
+accurate. Both scripts share the same CLI.
+
 ## Setup
 
 ### 1. System dependency: ffmpeg
@@ -67,24 +85,6 @@ Copy the env template and paste your token in:
    ```
 
 `--hf-token` on the command line, which overrides the env value.
-
-## Usage
-
-```bash
-# Minimal — token read from .env:
-python diarization_whisperx.py match.mp4
-
-# All options:
-python diarization_whisperx.py match.mp4 \
-  --num-speakers 2 \
-  --model large-v3 \
-  --out transcript.txt \
-  --hf-token hf_xxxxxxxxxxxx     # optional; defaults to HF_TOKEN from .env
-```
-
-`--num-speakers` is optional but recommended — passing the known count (e.g. `2`
-for a two-person commentary booth) makes diarization significantly more
-accurate. Both scripts share the same CLI.
 
 ### Quick test
 
