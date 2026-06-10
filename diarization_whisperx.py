@@ -11,6 +11,7 @@ accepted. Set HF_TOKEN in .env (see .env.example) or pass --hf-token.
 """
 
 import argparse
+import gc
 import os
 
 import torch
@@ -21,28 +22,48 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _free(*models):
+    """Drop models and reclaim VRAM so the next pipeline stage has room."""
+    for m in models:
+        del m
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
 def diarize_transcribe(audio_file, hf_token, model_size="large-v3",
                        num_speakers=None, batch_size=16):
     """Run the full WhisperX pipeline and return speaker-labeled segments."""
     if torch.cuda.is_available():
-        device, compute_type = "cuda", "float16"
+        # int8 (not float16) so large-v3 fits alongside the align + diarize
+        # models on small GPUs (e.g. 4 GB laptop cards).
+        device, compute_type = "cuda", "int8"
     else:
         # int8 keeps CPU inference tractable; float16 is not supported on CPU.
         device, compute_type = "cpu", "int8"
 
+    # A 4 GB laptop GPU can't fit the default 16-chunk encode batch alongside
+    # the resident VAD model; shrink it so the encoder forward pass fits.
+    if device == "cuda":
+        batch_size = min(batch_size, 4)
+
+    audio = whisperx.load_audio(audio_file)
+
     # 1. Transcribe with Whisper (faster-whisper backend).
     model = whisperx.load_model(model_size, device, compute_type=compute_type)
-    audio = whisperx.load_audio(audio_file)
     result = model.transcribe(audio, batch_size=batch_size)
+    language = result["language"]
+    _free(model)
 
     # 2. Align for accurate word-level timestamps.
     model_a, metadata = whisperx.load_align_model(
-        language_code=result["language"], device=device
+        language_code=language, device=device
     )
     result = whisperx.align(
         result["segments"], model_a, metadata, audio, device,
         return_char_alignments=False,
     )
+    _free(model_a)
 
     # 3. Diarize (who spoke when) and assign speakers to words.
     # Pin to 3.1 for parity with diarization_pyannote.py (WhisperX otherwise
