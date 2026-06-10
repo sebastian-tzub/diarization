@@ -1,0 +1,21 @@
+# Speaker diarization pipeline — pinned to the versions this repo was tested with.
+#
+# torch/torchaudio are listed WITHOUT a +cuXXX suffix so this file works on both
+# GPU and CPU machines. Choose the matching install command (see README.md):
+#   GPU (CUDA 12.x):  pip install -r requirements.txt
+#   CPU only:         pip install -r requirements.txt \
+#                       --extra-index-url https://download.pytorch.org/whl/cpu
+#
+# pyannote.audio 4.x pulls in torchcodec automatically; this pipeline does not
+# use it (audio is loaded in-memory via scipy), so its FFmpeg warnings are safe
+# to ignore.
+
+torch==2.8.0
+torchaudio==2.8.0
+
+pyannote.audio==4.0.4
+openai-whisper==20250625
+
+scipy==1.17.1
+numpy==2.4.6
+python-dotenv==1.2.2

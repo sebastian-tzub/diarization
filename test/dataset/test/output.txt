@@ -1,0 +1,8 @@
+[0.0s] SPEAKER_00: So Erin, in your email you said you wanted to talk about the exam.
+[5.0s] SPEAKER_01: Yeah, um, I've just never taken a class with so many different readings.
+[10.1s] SPEAKER_01: I've managed to keep up with all the assignments, but I'm not sure how to...
+[15.0s] SPEAKER_01: how to...
+[16.2s] SPEAKER_00: How to review everything?
+[18.5s] SPEAKER_01: Yeah! In other classes I've had, there's usually just one book to review, not three different books, plus all those other text
+[25.9s] SPEAKER_01: excerpts and videos.
+
